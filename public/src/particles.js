@@ -11,6 +11,7 @@ function Particles(){
     this.particleWidth = parameters.particleWidth;
     this.particleHeight = parameters.particleHeight;
     this.particleBottom = parameters.particleBottom;
+    this.pixelRatio = parameters.pixelRatio;
 
     this.shaders = shaders;
     this.renderer = renderer;
@@ -41,6 +42,10 @@ function Particles(){
         type: 'f',
         value: this.n
       },
+      pixelRatio: {
+        type: 'f',
+        value: this.pixelRatio
+      },
       light: {
         type: '4f',
         value: [0.0, 2000, 1000, 0.7]
@@ -52,6 +57,10 @@ function Particles(){
       pos: {
         type: "t",
         value: this.grid.texPos1
+      },
+      vel: {
+        type: "t",
+        value: this.grid.texVel1
       }
     };
 
@@ -234,9 +243,11 @@ function Particles(){
 
     if (this.grid.itt%2===0){
       this.uniforms.pos.value = this.grid.texPos2;
+      this.uniforms.vel.value = this.grid.texVel2;
     }
     else{
       this.uniforms.pos.value = this.grid.texPos1;
+      this.uniforms.vel.value = this.grid.texVel1;
     }
   };
 

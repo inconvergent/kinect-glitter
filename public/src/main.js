@@ -14,7 +14,6 @@ var timeout = null;
 
 var winWidth = window.innerWidth;
 var winHeight = window.innerHeight;
-var viewRatio = winWidth/winHeight;
 var pixelRatio = window.devicePixelRatio || 1;
 
 var resolution = 512;
@@ -58,9 +57,6 @@ function windowAdjust() {
 
   console.log('window', winWidth,winHeight);
   console.log('pixel ratio', pixelRatio);
-
-  viewRatio = window.innerWidth/window.innerHeight;
-  console.log('screen ratio', viewRatio);
 }
 
 
@@ -132,7 +128,6 @@ $.when(
     camera.position.z = camStart.z;
     camera.lookAt(camTarget);
 
-    camera.aspect = viewRatio;
     camera.updateProjectionMatrix();
 
     renderer.setPixelRatio(pixelRatio);
@@ -185,7 +180,8 @@ $.when(
         size: size,
         particleWidth: 1.0,
         particleHeight: 200,
-        particleBottom: 0
+        particleBottom: 0,
+        pixelRatio: pixelRatio
       },
       camera,
       scene,
@@ -213,13 +209,8 @@ $.when(
       //var intersects = raycaster.intersectObjects([quad]);
 
       //if (intersects.length>0){
-        //var i = intersects[0].point;
-        //P.setMousePos(i, 1.0);
-
-        //clearTimeout(timeout);
-        //timeout = setTimeout(function(){
-          //P.setMousePos(i, 0.0);
-        //}, 100);
+        //var ee = intersects[0].point;
+        //eventQueue.push(ee);
       //}
       //else{
         //P.setMousePos(new THREE.Vector2(10000,10000), 0.0);
@@ -241,22 +232,16 @@ $.when(
       var intersects = raycaster.intersectObjects([quad]);
 
       if (intersects.length>0){
-        var inter = intersects[0].point;
-        eventQueue.push(inter);
-        console.log(eventQueue.length);
-        //P.setMousePos(inter, 1.0);
-
-        //clearTimeout(timeout);
-        //timeout = setTimeout(function(){
-          //P.setMousePos(inter, 1.0);
-        //}, 500);
+        var ee = intersects[0].point;
+        eventQueue.push(ee);
       }
       else{
         P.setMousePos(new THREE.Vector2(100000,100000), 0.0);
       }
     });
 
-    renderer.setClearColor(new THREE.Color(0xFFFFFF), 1.0);
+
+    renderer.setClearColor(new THREE.Color(0x000000), 1.0);
 
     var itt = 0;
     function animate(){
@@ -270,16 +255,17 @@ $.when(
         stats.update();
       }
 
-      var e = eventQueue.pop();
-      if (e){
-        P.setMousePos(e, 1.0);
+      var ee = eventQueue.shift();
+      if (ee){
+        P.setMousePos(ee, 1.0);
 
         clearTimeout(timeout);
         timeout = setTimeout(function(){
-          P.setMousePos(inter, 0.0);
-        }, 500);
+          P.setMousePos(ee, 0.0);
+        }, 300);
       }
       P.step();
+      renderer.setPixelRatio(pixelRatio);
       renderer.setSize(winWidth,winHeight);
       renderer.render(scene, camera);
     }

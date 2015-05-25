@@ -14,17 +14,7 @@ varying vec3 vView;
 varying vec3 vLight;
 
 uniform sampler2D pos;
-
-float rand(vec2 co){
-  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-}
-
-vec3 fog(float vdist, vec3 I){
-  vec3 fogColor = vec3(1.0);
-  float b = 0.0004;
-  float dens = 1.0-exp(-(vdist*b));
-  return mix(I,fogColor,dens);
-}
+uniform sampler2D vel;
 
 vec3 hsv2rgb(vec3 c){
   vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
@@ -33,23 +23,22 @@ vec3 hsv2rgb(vec3 c){
 }
 
 vec3 setColor(){
+  vec3 v = texture2D(vel, vColor.xy).xyz;
+  vec3 p = texture2D(pos, vColor.xy).xyz;
+  vec3 df = mousePos-p;
+  float hue = clamp(0.4+pow(length(df.xy)*0.0002,0.5),0.0,1.0);
 
-  vec3 h = texture2D(pos, vColor.xy).xyz;
-  vec3 df = mousePos-h;
-  float s = 1.0-clamp(length(df.xy)/150.0,0.0,1.0);
-  return hsv2rgb(vec3(0.5,s,s));
+  float s = clamp(length(v.xy)*0.5,0.0,1.0);
+  return hsv2rgb(vec3(hue,1.0-s,s*0.7));
 }
 
 void main(){
 
-  float opacity = 1.0;
   float vdist = length(vView);
-
   vec3 I = setColor();
-  //I = fog(vdist, I);
 
   gl_FragColor = vec4(
     I,
-    opacity
+    1.0
   );
 }

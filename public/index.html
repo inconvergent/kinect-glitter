@@ -62,8 +62,8 @@ table {
   border-spacing: 0; }
 
 body{
-  background-color: #FFF;
-  color: #000;
+  background-color: #000;
+  color: #FFF;
   padding: 0px;
   margin: 0px;
   font-family: 'Droid Sans', sans-serif;
@@ -107,7 +107,7 @@ strong { font-weight: bold; }
   opacity: 0.9;
 }
 hr{
-  color: #000;
+  color: #FFF;
 }
 .content {
   min-width: 100px;
@@ -117,7 +117,7 @@ hr{
   margin: 0 auto;
 }
 a, a.active, a.visited, a.hover{
-  color: #000;
+  color: #FFF;
   text-decoration: none;
 }
 </style>
@@ -128,7 +128,6 @@ a, a.active, a.visited, a.hover{
 <script src="lib/stats.min.js"></script>
 <script src="lib/ndarray.js"></script>
 <script src="lib/OrbitControls.js"></script>
-<script src="lib/socket.io-1.2.0.js"></script>
 <script src="src/grid.js"></script>
 <script src="src/particles.js"></script>
 
@@ -145,13 +144,13 @@ a, a.active, a.visited, a.hover{
 </head>
 <body>
 <div class="content">
-  <!--<div class="message">-->
-    <!--<h1 class="h2"><strong>Glitter [beta]</strong></h1>-->
-    <!--<div>-->
-      <!--<strong></strong><br><hr>-->
-      <!--<a href="http://inconvergent.net">inconvergent.net</a>-->
-    <!--</div>-->
-  <!--</div>-->
+  <div class="message">
+    <h1 class="h2"><strong>Glitter [beta]</strong></h1>
+    <div>
+      <strong>Move the mouse.</strong><br><hr>
+      <a href="http://inconvergent.net">inconvergent.net</a>
+    </div>
+  </div>
   <div id="box"></div>
 </div>
 <script src="src/main.js"></script>
