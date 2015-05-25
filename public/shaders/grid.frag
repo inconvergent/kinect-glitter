@@ -39,9 +39,8 @@ vec3 initialPos(vec2 here){
 vec3 nextVel(){
 
   float limit = 6.0;
-  float slowdown = 0.999;
-  float stp = 2.0;
-  float noise = 0.0;
+  float slowdown = 0.9;
+  float stp = 50.0;
 
   vec2 here = gl_FragCoord.xy/n;
   vec3 initial = initialPos(here);
@@ -56,23 +55,17 @@ vec3 nextVel(){
 
   dv1 = clamp(dv1/dd/dd,-limit,limit);
 
-  if (dd2<4.0){
+  if (dd2<5.0){
     dv2 = vec2(0.0);
   }
   else{
-    dv2 = normalize(dv2);
+    dv2 = 0.1*normalize(dv2);
   }
 
+  v.xy = slowdown*v.xy + 
+         stp*dv1*mouseScale + 
+         dv2;
 
-  v.xy = slowdown*v.xy + (stp*dv1)*mouseScale + dv2*0.01;
-
-  //vec3 r = vec3(
-    //rand(here.xy),
-    //rand(here.yx),
-    //rand(here.xy+here.yx)
-  //);
-
-  //r = 0.5-r;
   return v;
 }
 

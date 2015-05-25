@@ -30,7 +30,7 @@ do_time = False
 
 kern_size = 40
 
-df_lim = 0.1
+df_lim = 0.3
 
 
 def in_place_normalize(d):

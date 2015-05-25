@@ -34,14 +34,10 @@ vec3 hsv2rgb(vec3 c){
 
 vec3 setColor(){
 
-  //vec3 h = texture2D(pos, vColor.xy).xyz;
-  //vec3 df = abs(mousePos-h);
-  //float t = atan(df.x/df.y) / 3.1415;
-  //float t = length(df)
-
-  return hsv2rgb(vec3(0.45+vColor.x*0.4,0.9,0.4));
-
-  //return vec3(0.0,0.0,0.0);
+  vec3 h = texture2D(pos, vColor.xy).xyz;
+  vec3 df = mousePos-h;
+  float s = 1.0-clamp(length(df.xy)/150.0,0.0,1.0);
+  return hsv2rgb(vec3(0.5,s,s));
 }
 
 void main(){

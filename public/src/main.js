@@ -20,6 +20,8 @@ var pixelRatio = window.devicePixelRatio || 1;
 var resolution = 512;
 var size = 1500;
 
+var eventQueue = [];
+
 window.requestAnimFrame = (function(){
   return  window.requestAnimationFrame ||
           window.webkitRequestAnimationFrame ||
@@ -181,7 +183,7 @@ $.when(
       {
         n: resolution,
         size: size,
-        particleWidth: 0.7,
+        particleWidth: 1.0,
         particleHeight: 200,
         particleBottom: 0
       },
@@ -228,7 +230,6 @@ $.when(
     var socket = io();
     socket.on('event', function(msg){
       var a = msg.split(';');
-      console.log(a[2]);
 
       var mouse3D = new THREE.Vector3(
         (parseFloat(a[0]) * 2 - 1),
@@ -241,12 +242,14 @@ $.when(
 
       if (intersects.length>0){
         var inter = intersects[0].point;
-        P.setMousePos(inter, 1.0);
+        eventQueue.push(inter);
+        console.log(eventQueue.length);
+        //P.setMousePos(inter, 1.0);
 
-        clearTimeout(timeout);
-        timeout = setTimeout(function(){
-          P.setMousePos(inter, 0.0);
-        }, 500);
+        //clearTimeout(timeout);
+        //timeout = setTimeout(function(){
+          //P.setMousePos(inter, 1.0);
+        //}, 500);
       }
       else{
         P.setMousePos(new THREE.Vector2(100000,100000), 0.0);
@@ -267,6 +270,15 @@ $.when(
         stats.update();
       }
 
+      var e = eventQueue.pop();
+      if (e){
+        P.setMousePos(e, 1.0);
+
+        clearTimeout(timeout);
+        timeout = setTimeout(function(){
+          P.setMousePos(inter, 0.0);
+        }, 500);
+      }
       P.step();
       renderer.setSize(winWidth,winHeight);
       renderer.render(scene, camera);
