@@ -178,7 +178,7 @@ $.when(
       {
         n: resolution,
         size: size,
-        particleWidth: 1.0,
+        particleWidth: 2.0,
         particleHeight: 200,
         particleBottom: 0,
         pixelRatio: pixelRatio
