@@ -30,7 +30,7 @@ do_time = False
 
 kern_size = 40
 
-df_lim = 0.3
+df_lim = 0.2
 
 
 def in_place_normalize(d):
@@ -69,6 +69,7 @@ def get_depth():
   m_prev = [0]
   itt = [0]
   times = []
+  points = []
 
   if do_depth_plot:
     plt.figure(1)
@@ -128,7 +129,13 @@ def get_depth():
     handle.set_data(image) 
 
     if df[j,i]>df_lim:
-      plt.plot(i,j, 'ro', ms=20)
+      try:
+        l = points.pop()
+        l.remove()
+      except IndexError:
+        pass
+      new_l = plt.plot(i,j, 'ro', ms=20)
+      points.extend(new_l)
       #print('*'*40)
 
     plt.draw()

@@ -235,9 +235,6 @@ $.when(
         var ee = intersects[0].point;
         eventQueue.push(ee);
       }
-      else{
-        P.setMousePos(new THREE.Vector2(100000,100000), 0.0);
-      }
     });
 
 
