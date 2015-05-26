@@ -42,6 +42,11 @@ def in_place_normalize(d):
 def in_place_smooth(d):
   d[:,:] = cv2.blur(d,(kern_size, kern_size))
 
+def in_place_clear_boundary(d,v):
+  d[:,0] = v
+  d[:,-1] = v
+  d[0,:] = v
+  d[-1,:] = v
 
 def set_normals(normals,d,kern=3):
 
@@ -96,6 +101,7 @@ def get_depth():
 
     df[:] = data_prev[:] - data[:]
     df[df<0.05] = 0.0
+    #in_place_clear_boundary(df,-1000.0)
 
     pm = argmax(df)
     j,i = unravel_index(pm, (h,w))
@@ -125,6 +131,8 @@ def get_depth():
     image[:,:,1] = data
     image[:,:,2] = 1.0
     image[shadowmask,2] = 0.0
+    image[shadowmask,1] = 0.0
+    image[shadowmask,0] = 0.0
 
     handle.set_data(image) 
 
