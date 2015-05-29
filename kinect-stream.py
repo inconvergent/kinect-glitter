@@ -5,11 +5,19 @@ import matplotlib.pyplot as plt
 from scipy.signal import argrelmax
 import signal
 import numpy as np
-import cv2
 from numpy import array, abs, \
                   clip, unravel_index, argmax, nanargmax, isnan,\
-                  concatenate, cross, reshape
+                  concatenate, cross, reshape, nanmax
+
+from scipy import ndimage
+
+from sklearn.cluster import DBSCAN
+
 from numpy.linalg import norm
+
+from sklearn.feature_extraction import image as cluster_image
+from sklearn.cluster import spectral_clustering
+
 from sys import stdout
 from time import time
 
@@ -25,49 +33,30 @@ keep_running = True
 do_depth_plot = False
 do_time = False
 
-#do_depth_plot = True
+do_depth_plot = True
 #do_time = True
 
 kern_size = 40
 
-df_lim = 0.2
+df_lim = 0.9
 
 
-def in_place_normalize(d):
-  clip(d, 0, 2**10 - 1, d)
-  top = d.max()
-  bottom = d.min()
-  d[:,:] = (d[:,:]-bottom) / (top-bottom)
-
-def in_place_smooth(d):
-  d[:,:] = cv2.blur(d,(kern_size, kern_size))
-
-def in_place_clear_boundary(d,v):
-  d[:,0] = v
-  d[:,-1] = v
-  d[0,:] = v
-  d[-1,:] = v
-
-def set_normals(normals,d,kern=3):
-
-  data = cv2.blur(d,(kern, kern))
-  s = 2.0/w
-  dfx = np.zeros(shape=(h,w,3), dtype='float')
-  dfy = np.zeros(shape=(h,w,3), dtype='float')
-  dfx[:,:,0] = s
-  dfx[1:,1:,2] = -(data[1:,1:]-data[:-1,1:])/s
-  dfy[:,:,1] = s
-  dfy[1:,1:,2] = -(data[1:,1:]-data[1:,:-1])/s
-  normals[:,:,:] = cross(dfx,dfy)
-  normals[:] = 0.5 + 0.5*normals/reshape(norm(normals, axis=2), (h,w,1))
+#def in_place_normalize(d):
+  #clip(d, 0, 2**10 - 1, d)
+  #top = d.max()
+  #bottom = d.min()
+  #d[:,:] = (d[:,:]-bottom) / (top-bottom)
 
 def get_depth():
   
   data_prev = np.zeros(shape=(h,w), dtype='float')
   data = np.zeros(shape=(h,w), dtype='float')
+
+  shadowmask = np.zeros(shape=(h,w), dtype='bool')
+  shadowmask_prev = np.zeros(shape=(h,w), dtype='bool')
+
   image = np.zeros(shape=(h,w,3), dtype='float')
 
-  normals = np.zeros(shape=(h,w,3), dtype='float')
   df = np.zeros(shape=(h,w), dtype='float')
   xy_prev = array([0.,0.])
   xy = array([0.,0.])
@@ -75,6 +64,7 @@ def get_depth():
   itt = [0]
   times = []
   points = []
+
 
   if do_depth_plot:
     plt.figure(1)
@@ -90,61 +80,47 @@ def get_depth():
     t0 = time()
     itt[0] += 1
 
-    data[:] = in_data[:,::-1]
+    data[:] = in_data[:,::-1].astype('float')
 
-    in_place_normalize(data)
+    shadowmask_prev[:] = shadowmask[:]
+    shadowmask[:] = data>=2047.
 
-    shadowmask = data >= 1.0
-    #set_normals(normals,data,kern=200)
+    shadowmask_tot = np.logical_or(shadowmask_prev, shadowmask)
+    not_shadow = np.logical_not(shadowmask_tot)
 
-    in_place_smooth(data)
+    data[:] /= 2047.
+    #data[:] = ndimage.gaussian_filter(data, 2)
+    #data[:] = ndimage.uniform_filter(data, 4)
 
-    df[:] = data_prev[:] - data[:]
-    df[df<0.05] = 0.0
-    #in_place_clear_boundary(df,-1000.0)
 
-    pm = argmax(df)
-    j,i = unravel_index(pm, (h,w))
-    m = data[j,i]
+    df[:] =  abs(data_prev[:] - data[:])
+    df[:] /= df.max()
+    adf = ndimage.grey_erosion(df,20)
+    adf[:] /= adf.max()
+
+    ji = argmax(adf)
+    j,i = unravel_index(ji, (h,w))
 
     xy[:] = [i/w,j/h]
-
     data_prev[:] = data[:]
-    xy_prev[:] = xy[:]
-    m_prev[0] = m
 
-    if df[j,i]>df_lim:
-      stdout.write('{:f};{:f};{:d};'.format(xy[0],xy[1],itt[0]))
-      stdout.flush()
+    image[:] = 0.
 
-    if do_time:
-      print('\ntime: {:1.5f}s'.format(time()-t0))
-
-    if not do_depth_plot:
-      return
-
-    #image[:,:,0] = data
-    #image[:,:,1] = data
-    #image[:,:,2] = data
-
-    image[:,:,0] = df/df.max()
-    image[:,:,1] = data
-    image[:,:,2] = 1.0
-    image[shadowmask,2] = 0.0
-    image[shadowmask,1] = 0.0
-    image[shadowmask,0] = 0.0
+    image[:,:,0] = adf
+    image[not_shadow,1] = data[not_shadow]
+    image[not_shadow,2] = data[not_shadow]
 
     handle.set_data(image) 
 
-    if df[j,i]>df_lim:
-      try:
-        l = points.pop()
-        l.remove()
-      except IndexError:
-        pass
+    try:
+      l = points.pop()
+      l.remove()
+    except IndexError:
+      pass
+
+    if adf[j,i]>df_lim:
       new_l = plt.plot(i,j, 'ro', ms=20)
       points.extend(new_l)
-      #print('*'*40)
 
     plt.draw()
 
