@@ -108,7 +108,8 @@ function Grid(){
   };
   this.setInitialConditions = function setInitialConditions(){
     this.renderer.setPixelRatio(1);
-    this.renderer.setSize(this.n,this.n);
+    //this.renderer.setSize(this.n,this.n);
+    this.renderer.setViewport(0,0,winWidth,winHeight);
 
     this.uniforms.mode.value = -2.0;
     this.renderer.render(this.scene, this.camera, this.texVel1, true);
@@ -122,7 +123,8 @@ function Grid(){
   this.step = function step(){
     this.uniforms.itt.value = this.itt;
     this.renderer.setPixelRatio(1);
-    this.renderer.setSize(this.n,this.n);
+    //this.renderer.setSize(this.n,this.n);
+    this.renderer.setViewport(0,0,winWidth,winHeight);
 
 
     if (this.itt%2===0){

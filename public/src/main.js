@@ -263,7 +263,7 @@ $.when(
       }
       P.step();
       renderer.setPixelRatio(pixelRatio);
-      renderer.setSize(winWidth,winHeight);
+      renderer.setViewport(0,0,winWidth,winHeight);
       renderer.render(scene, camera);
     }
 

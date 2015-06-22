@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.signal import argrelmax
 import signal
 import numpy as np
-import cv2
+from scipy import ndimage
 from numpy import array, abs, \
                   clip, unravel_index, argmax, nanargmax, isnan,\
                   concatenate, cross, reshape
@@ -40,26 +40,13 @@ def in_place_normalize(d):
   d[:,:] = (d[:,:]-bottom) / (top-bottom)
 
 def in_place_smooth(d):
-  d[:,:] = cv2.blur(d,(kern_size, kern_size))
+  d[:,:] = ndimage.uniform_filter(d, kern_size) 
 
 def in_place_clear_boundary(d,v):
   d[:,0] = v
   d[:,-1] = v
   d[0,:] = v
   d[-1,:] = v
-
-def set_normals(normals,d,kern=3):
-
-  data = cv2.blur(d,(kern, kern))
-  s = 2.0/w
-  dfx = np.zeros(shape=(h,w,3), dtype='float')
-  dfy = np.zeros(shape=(h,w,3), dtype='float')
-  dfx[:,:,0] = s
-  dfx[1:,1:,2] = -(data[1:,1:]-data[:-1,1:])/s
-  dfy[:,:,1] = s
-  dfy[1:,1:,2] = -(data[1:,1:]-data[1:,:-1])/s
-  normals[:,:,:] = cross(dfx,dfy)
-  normals[:] = 0.5 + 0.5*normals/reshape(norm(normals, axis=2), (h,w,1))
 
 def get_depth():
   
